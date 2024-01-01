@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://ugetuyenar4a"]
+
+[ext_resource type="Script" path="res://blocks/main_block.gd" id="1_g0xbo"]
+[ext_resource type="PackedScene" uid="uid://bllw6s8ra3tiw" path="res://blocks/block_part_rigid_body.tscn" id="1_lon3t"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r0q2s"]
+size = Vector3(3.53418, 3.52203, 1.44135)
+
+[node name="OBlock" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.874243, 0, 0)
+script = ExtResource("1_g0xbo")
+
+[node name="BlockPartRigidBody" parent="." instance=ExtResource("1_lon3t")]
+
+[node name="BlockPartRigidBody2" parent="." instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.76, 2.08165e-12, 2.08165e-12)
+
+[node name="BlockPartRigidBody3" parent="." instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.76, 1.76, 2.08165e-12)
+
+[node name="BlockPartRigidBody4" parent="." instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1.76, 2.08165e-12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.882324, 1.77914, -0.00149536)
+shape = SubResource("BoxShape3D_r0q2s")
