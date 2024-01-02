@@ -1,7 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bllw6s8ra3tiw"]
 
-[ext_resource type="PackedScene" uid="uid://dcrdo33i86y8s" path="res://assets/block_part.glb" id="1_vjsn4"]
+[ext_resource type="ArrayMesh" uid="uid://cm2xqnwjfua7c" path="res://assets/single_block.obj" id="1_m0nob"]
 
 [node name="MeshInstance3D" type="MeshInstance3D"]
-
-[node name="block_part" parent="." instance=ExtResource("1_vjsn4")]
+mesh = ExtResource("1_m0nob")

@@ -25,6 +25,7 @@ func _physics_process(_delta):
 		move_and_collide(Vector3(movement_size, 0, 0))
 	if Input.is_action_just_pressed("move_down"):
 		collision_info = move_and_collide(Vector3(0, movement_size*-1, 0))
+		frame_counter = 0 # Reset the frame counter to avoid double movement
 	if Input.is_action_just_pressed("rotate_cw"):
 		rotate(Vector3(0, 0, 1), -90)
 	if Input.is_action_just_pressed("rotate_ccw"):
@@ -32,7 +33,8 @@ func _physics_process(_delta):
 		
 	# Check if the block hits the floor; only not null on downward movement
 	if collision_info:
-		if collision_info.get_angle() == 0:			
+		print(collision_info.get_angle())
+		if collision_info.get_angle() < 0.05: # the tblock collision is just SLIGHTLY angled lol
 			# Emit signal
 			emit_signal("block_land", position)
 			
