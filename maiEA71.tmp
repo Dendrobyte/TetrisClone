@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://10tuwo4gmihv"]
+[gd_scene load_steps=4 format=3 uid="uid://10tuwo4gmihv"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_3lkeu"]
 [ext_resource type="ArrayMesh" uid="uid://bq0y5b7jsn382" path="res://assets/Border.obj" id="2_7xgnq"]
-[ext_resource type="Script" path="res://moving_block_controller.gd" id="2_mqbh0"]
 
 [sub_resource type="Environment" id="Environment_1uo0t"]
 background_mode = 1
@@ -11,11 +10,13 @@ ambient_light_color = Color(0.768627, 0.792157, 0.827451, 1)
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
-
-[node name="MovingBlockController" type="Node3D" parent="."]
-script = ExtResource("2_mqbh0")
-
-[node name="FrozenBlocks" type="Node3D" parent="."]
+initStartRow = null
+initStartCol = null
+falling_speed = null
+block1X = null
+block1Y = null
+block2X = null
+block2Y = null
 
 [node name="BorderMesh" type="MeshInstance3D" parent="."]
 mesh = ExtResource("2_7xgnq")
