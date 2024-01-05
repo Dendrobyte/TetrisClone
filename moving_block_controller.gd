@@ -1,6 +1,6 @@
 extends Node3D
 
-func _process(delta):
+func _process(_delta):
 	"""
 	Handle block movement
 	
@@ -25,3 +25,6 @@ func _process(delta):
 		rotate_z(deg_to_rad(int(-90)))
 	if Input.is_action_just_pressed("rotate_ccw"):
 		rotate_z(deg_to_rad(int(90)))
+
+func reset_position():
+	position = Vector3(0, 0, 0)

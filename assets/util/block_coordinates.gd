@@ -1,6 +1,6 @@
 extends Node
 
-var block_count = 2 # For now, o and t blocks
+var block_count = 7 # For now, o and t blocks
 
 var o_block = [
 	[2, 2],
