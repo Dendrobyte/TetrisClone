@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cm5ax0mgdmi8p"
-path="res://.godot/imported/Border.glb-afce1270f1573fe121e2a63900d1ef04.scn"
+uid="uid://dcrdo33i86y8s"
+path="res://.godot/imported/block_part.glb-8f7448eb61f4c96385c8d615bdb50349.scn"
 
 [deps]
 
-source_file="res://assets/Border.glb"
-dest_files=["res://.godot/imported/Border.glb-afce1270f1573fe121e2a63900d1ef04.scn"]
+source_file="res://deprecated/blocks_deprecated/assets/block_part.glb"
+dest_files=["res://.godot/imported/block_part.glb-8f7448eb61f4c96385c8d615bdb50349.scn"]
 
 [params]
 

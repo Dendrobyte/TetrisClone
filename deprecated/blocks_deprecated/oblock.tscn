@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://ugetuyenar4a"]
+
+[ext_resource type="PackedScene" uid="uid://bllw6s8ra3tiw" path="res://deprecated/blocks_deprecated/block_part_rigid_body.tscn" id="1_lon3t"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r0q2s"]
+size = Vector3(3.49835, 3.51443, 1.44135)
+
+[node name="OBlock" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.874243, -1.76998, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.882293, 1.77534, -0.00149536)
+shape = SubResource("BoxShape3D_r0q2s")
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.87574, 1.78502, 0)
+
+[node name="BlockPartRigidBody" parent="Pivot" instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.87574, -1.78502, 0)
+skeleton = NodePath("../..")
+
+[node name="BlockPartRigidBody2" parent="Pivot" instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88426, -1.78502, 2.08165e-12)
+skeleton = NodePath("../..")
+
+[node name="BlockPartRigidBody3" parent="Pivot" instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88426, -0.0250196, 2.08165e-12)
+skeleton = NodePath("../..")
+
+[node name="BlockPartRigidBody4" parent="Pivot" instance=ExtResource("1_lon3t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.87574, -0.0250196, 2.08165e-12)
+skeleton = NodePath("../..")
