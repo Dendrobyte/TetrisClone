@@ -123,7 +123,7 @@ func draw_block(horizontal, vertical, block_type):
 	block.position = Vector3(horizontal, vertical, 1)
 	# This feels... reflect-y
 	block.get_children()[0].mesh = load(
-		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(moving_block_type)
+		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(block_type)
 	)
 	return block
 
