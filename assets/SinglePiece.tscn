@@ -1,8 +1,5 @@
-[gd_scene load_steps=2 format=3 uid="uid://c7mvghtruha0r"]
-
-[ext_resource type="ArrayMesh" uid="uid://d0igycqo6xivk" path="res://assets/SingleBlock.obj" id="2_qxv2c"]
+[gd_scene format=3 uid="uid://c7mvghtruha0r"]
 
 [node name="SinglePiece" type="Node3D"]
 
 [node name="CubeMesh" type="MeshInstance3D" parent="."]
-mesh = ExtResource("2_qxv2c")

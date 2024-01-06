@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cvx41d88vkh62"
+path="res://.godot/imported/SingleBlock-0.obj-67be6cc3e69a7c1a21737c7f0e730f43.mesh"
+
+[deps]
+
+files=["res://.godot/imported/SingleBlock-0.obj-67be6cc3e69a7c1a21737c7f0e730f43.mesh"]
+
+source_file="res://assets/SingleBlock-0.obj"
+dest_files=["res://.godot/imported/SingleBlock-0.obj-67be6cc3e69a7c1a21737c7f0e730f43.mesh", "res://.godot/imported/SingleBlock-0.obj-67be6cc3e69a7c1a21737c7f0e730f43.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

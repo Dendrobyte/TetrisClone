@@ -122,10 +122,8 @@ func draw_block(horizontal, vertical, block_type):
 	var block = load("res://assets/SinglePiece.tscn").instantiate()
 	block.position = Vector3(horizontal, vertical, 1)
 	# This feels... reflect-y
-	# TODO: Sets blocks to all the same color at the moment, perhaps change material type depending?
-	#		Need different materials since I'm getting the material and modifying it, not the actual mesh
-	block.get_children()[0].get_mesh().surface_get_material(0).albedo_color = (
-		BlockCoords.block_colors[block_type]
+	block.get_children()[0].mesh = load(
+		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(moving_block_type)
 	)
 	return block
 
@@ -190,6 +188,8 @@ func rotate_moving_block(rotation_change):
 
 	# TODO
 	# Calculate offset from starting position in moving coords
+	# NOTE: You should get the current rotation or something...
+	#		Maybe hold on to xOffset and yOffset each move for now tbh
 
 	# Reset moving coords
 
