@@ -11,7 +11,9 @@ ambient_light_color = Color(0.768627, 0.792157, 0.827451, 1)
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
-falling_speed = 10
+initStartRow = null
+initStartCol = null
+falling_speed = null
 
 [node name="MovingBlockController" type="Node3D" parent="."]
 script = ExtResource("2_mqbh0")

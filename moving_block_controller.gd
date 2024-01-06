@@ -1,5 +1,6 @@
 extends Node3D
 
+
 func _process(_delta):
 	"""
 	Handle block movement
@@ -18,13 +19,14 @@ func _process(_delta):
 	if Input.is_action_just_pressed("move_down"):
 		if get_parent().moving_block_transform(0, -1):
 			translate(Vector3(0, -1, 0))
-			get_parent().frame_counter = 0 # Reset the frame counter to avoid weird skipping movement
-		
-	# TODO: You... you will wait because grid stuff :)
+			get_parent().frame_counter = 0  # Reset the frame counter to avoid weird skipping movement
+
+	# TODO: Make a moving_block_rotate_check or something and use same if logic as above
 	if Input.is_action_just_pressed("rotate_cw"):
-		rotate_z(deg_to_rad(int(-90)))
+		get_parent().rotate_moving_block(1)
 	if Input.is_action_just_pressed("rotate_ccw"):
-		rotate_z(deg_to_rad(int(90)))
+		get_parent().rotate_moving_block(-1)
+
 
 func reset_position():
 	position = Vector3(0, 0, 0)

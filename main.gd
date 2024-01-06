@@ -7,11 +7,14 @@ extends Node
 # 1 -> moving block piece
 # 2 -> frozen block piece
 var game_grid = []
+
+
 func pretty_grid_print():
 	print("------------ START ------------")
-	for i in range(game_grid.size()-1, -1, -1):
+	for i in range(game_grid.size() - 1, -1, -1):
 		print(game_grid[i])
 	print("------------ END ------------")
+
 
 # Coordinates for our moving block
 # It will match the block coordinates matrix, but contain a tuple of global coords where there would be 2s
@@ -23,18 +26,21 @@ var moving_block_coords = []
 
 # Keep track of which block we are moving so we can draw the proper color
 var moving_block_type = -1
+var moving_block_rotation = -1  # 0 up, 1 right, 2 down, 3 left
 
 # TODO: Need to allow blocks to spawn above the grid. Should be fine since player can't move up.
 # Weirdly inverted? Row not being X throws me off, but effectively rows are sitting on the Y. We draw top down.
-@export var initStartRow:int = 18 # Y | 0 is the bottom row
-@export var initStartCol:int = 4 # X | which column /in the above row/ to start at
-@export_range (1, 60) var falling_speed:int = 60
+@export var initStartRow: int = 18  # Y | 0 is the bottom row
+@export var initStartCol: int = 4  # X | which column /in the above row/ to start at
+@export_range(1, 60) var falling_speed: int = 60
 var frame_counter: int = 0
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	init_game_grid()
 	spawn_block()
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -49,6 +55,7 @@ func _process(_delta):
 	else:
 		frame_counter += 1
 
+
 func init_game_grid():
 	var grid_rows = []
 	for i in range(20):
@@ -56,8 +63,9 @@ func init_game_grid():
 		for j in range(10):
 			row_arr.append(0)
 		grid_rows.append(row_arr)
-	game_grid = grid_rows.duplicate() # Shallow or deep doesn't matter
+	game_grid = grid_rows.duplicate()  # Shallow or deep doesn't matter
 	pretty_grid_print()
+
 
 # Iterate over the game grid and draw blocks visually
 # Called when a line is cleared and we can assume a fair portion of the grid changes
@@ -66,15 +74,17 @@ func init_game_grid():
 func draw_game_grid():
 	pass
 
+
 func spawn_block():
 	# Generate a block
-	var block_num = randi_range(0, BlockCoords.block_count-1)
+	var block_num = randi_range(0, BlockCoords.block_count - 1)
 	moving_block_type = block_num
+	moving_block_rotation = 0  # Start up
 	var block_matrix = BlockCoords.block_map[block_num]
-	
+
 	# Reset the moving block coordinates
 	moving_block_coords = []
-	
+
 	# Set its position to the start
 	var posVertical = initStartRow
 	var posHorizontal = initStartCol
@@ -84,26 +94,28 @@ func spawn_block():
 				moving_block_coords.append([posHorizontal, posVertical])
 				# TODO: Run this at the end, or elsewhere, to draw all the moving block coords
 				draw_moving_block(posHorizontal, posVertical, moving_block_type)
-			posHorizontal += 1 # Draw left to right
+			posHorizontal += 1  # Draw left to right
 		posHorizontal = initStartCol
-		posVertical -= 1 # Draw top to bottom
+		posVertical -= 1  # Draw top to bottom
+
 
 # Takes the current moving block coordinates and freeze them to the game grid
 # Aka sets those coordinates to 2s
 func freeze_moving_block():
 	# Update the game grid with 1s and draw a block at that position
 	for coord in moving_block_coords:
-		game_grid[coord[1]][coord[0]] = 1 # Inverted for the grid!
+		game_grid[coord[1]][coord[0]] = 1  # Inverted for the grid!
 		# TODO: This draw block function will change to accept all the coords
 		draw_frozen_block(coord[0], coord[1], moving_block_type)
 		# TODO: Check y levels of block here for line clear
-		
+
 	moving_block_coords = []
 	for child in $MovingBlockController.get_children():
 		child.queue_free()
 	$MovingBlockController.reset_position()
-	
+
 	spawn_block()
+
 
 # Child functino to draw a block, doesn't parent to show in scene
 func draw_block(horizontal, vertical, block_type):
@@ -112,36 +124,73 @@ func draw_block(horizontal, vertical, block_type):
 	# This feels... reflect-y
 	# TODO: Sets blocks to all the same color at the moment, perhaps change material type depending?
 	#		Need different materials since I'm getting the material and modifying it, not the actual mesh
-	block.get_children()[0].get_mesh().surface_get_material(0).albedo_color = BlockCoords.block_colors[block_type]
+	block.get_children()[0].get_mesh().surface_get_material(0).albedo_color = (
+		BlockCoords.block_colors[block_type]
+	)
 	return block
-	
+
+
 # Visually draw a block of a certain type at the given coordinates that parents to our moving block controller
 func draw_moving_block(horizontal, vertical, block_type):
 	var block = draw_block(horizontal, vertical, block_type)
 	$MovingBlockController.add_child(block)
-	
+
+
 # Visually draw a block that will never move
 func draw_frozen_block(horizontal, vertical, block_type):
 	var block = draw_block(horizontal, vertical, block_type)
 	$FrozenBlocks.add_child(block)
-	
+
+
 # Given an x and y coordinate, update the coordinates in moving_block_coords by the given X and Y
 # Weirdness of the row/col stuff is irrelevant to inputs
 func moving_block_transform(changeX, changeY):
-	var can_move: bool = true # True unless otherwise noted
+	var can_move: bool = true  # True unless otherwise noted
 	var new_moving_block_coords = moving_block_coords.duplicate(true)
 	for coord in new_moving_block_coords:
-		coord[0] = coord[0]+changeX
-		coord[1] = coord[1]+changeY
+		coord[0] = coord[0] + changeX
+		coord[1] = coord[1] + changeY
 		# Check border bounds, doesn't matter what blocks we check
 		if (coord[0] < 0 or coord[0] > 9) or coord[1] < 0:
 			can_move = false
-			return can_move # Early return, one illegal move is all we need
-		
+			return can_move  # Early return, one illegal move is all we need
+
 		# Check if there are placed blocks around it, can ignore moving block pieces (2s)
 		if game_grid[coord[1]][coord[0]] == 1:
 			can_move = false
 			return can_move
-	# TODO: Better way to do this? Like proper temp array stuff?
+
 	moving_block_coords = new_moving_block_coords.duplicate()
 	return can_move
+
+
+# TODO: Make return if possible like the above moving transform function
+func rotate_moving_block(rotation_change):
+	moving_block_rotation = (moving_block_rotation + rotation_change) % 4
+	var block_matrix = BlockCoords.block_map[moving_block_type]  # Starts at 0
+
+	# Perform rotation(s) on original matrix
+	for i in range(abs(moving_block_rotation)):
+		var x = block_matrix.size()
+		var y = block_matrix[0].size()
+		var new_rotation = []
+
+		# Transpose
+		for m in range(y):
+			var new_row = []
+			new_row.resize(x)
+			new_rotation.append(new_row)
+
+		# Reverse each row
+		for m in range(x):
+			for n in range(y):
+				new_rotation[n][m] = block_matrix[x - m - 1][n]
+
+		#print("new rotation:", new_rotation)
+
+	# TODO
+	# Calculate offset from starting position in moving coords
+
+	# Reset moving coords
+
+	# Redraw block
