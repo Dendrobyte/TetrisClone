@@ -1,18 +1,10 @@
 extends Node
 
-var block_count = 7 # For now, o and t blocks
+var block_count = 7  # For now, o and t blocks
 
-var o_block = [
-	[2, 2],
-	[2, 2]
-]
+var o_block = [[2, 2], [2, 2]]
 
-var t_block = [
-	[0, 2, 0],
-	[2, 2, 2],
-	[0, 0, 0]
-	
-]
+var t_block = [[0, 2, 0], [2, 2, 2], [0, 0, 0]]
 
 var i_block = [
 	[0, 2, 0, 0],
@@ -21,29 +13,13 @@ var i_block = [
 	[0, 2, 0, 0],
 ]
 
-var j_block = [
-	[2, 0, 0],
-	[2, 2, 2],
-	[0, 0, 0]
-]
+var j_block = [[2, 0, 0], [2, 2, 2], [0, 0, 0]]
 
-var l_block = [
-	[0, 0, 2],
-	[2, 2, 2],
-	[0, 0, 0]
-]
+var l_block = [[0, 0, 2], [2, 2, 2], [0, 0, 0]]
 
-var s_block = [
-	[0, 2, 2],
-	[2, 2, 0],
-	[0, 0, 0]
-]
+var s_block = [[0, 2, 2], [2, 2, 0], [0, 0, 0]]
 
-var z_block = [
-	[2, 2, 0],
-	[0, 2, 2],
-	[0, 0, 0]
-]
+var z_block = [[2, 2, 0], [0, 2, 2], [0, 0, 0]]
 
 var block_map = {
 	0: o_block,
@@ -64,6 +40,7 @@ var block_colors = {
 	5: Color.DARK_RED,
 	6: Color.DARK_GREEN,
 }
+
 
 # Takes a given block matrix and applies a rotation
 func rotate_block(_block):

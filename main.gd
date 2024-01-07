@@ -16,19 +16,19 @@ func pretty_grid_print():
 	print("------------ END ------------")
 
 
-# Coordinates for our moving block
-# It will match the block coordinates matrix, but contain a tuple of global coords where there would be 2s
-# TODO: Have the draw block function use these instead
-var moving_block_coords = []
-
 # The actual moving block node
 @onready var moving_block: Node3D = $MovingBlockController
 
+# Save offset from start each movement for drawing, freezing. Makes rotation possible (I hope?)
+var offset_from_start = [0, 0]
 # Keep track of which block we are moving so we can draw the proper color
 var moving_block_type = -1
+# Track rotation so we can apply n rotations depending
 var moving_block_rotation = -1  # 0 up, 1 right, 2 down, 3 left
+# Hold on to the matix so maybe I don't have to rotate multiple times?
+var moving_block_matrix = []
 
-# TODO: Need to allow blocks to spawn above the grid. Should be fine since player can't move up.
+# TODO: Need to allow blocks to spawn above the grid. Should be fine since player can't move up. Extend infinitely?
 # Weirdly inverted? Row not being X throws me off, but effectively rows are sitting on the Y. We draw top down.
 @export var initStartRow: int = 18  # Y | 0 is the bottom row
 @export var initStartCol: int = 4  # X | which column /in the above row/ to start at
@@ -53,7 +53,9 @@ func _process(_delta):
 			freeze_moving_block()
 		frame_counter = 0
 	else:
-		frame_counter += 1
+		# while testing rotation I don't want to have to worry about this
+		# frame_counter += 1
+		pass
 
 
 func init_game_grid():
@@ -80,36 +82,31 @@ func spawn_block():
 	var block_num = randi_range(0, BlockCoords.block_count - 1)
 	moving_block_type = block_num
 	moving_block_rotation = 0  # Start up
-	var block_matrix = BlockCoords.block_map[block_num]
+	offset_from_start = [0, 0]
+	moving_block_matrix = BlockCoords.block_map[block_num]
 
-	# Reset the moving block coordinates
-	moving_block_coords = []
+	# Reset the blocks offset from start
+	offset_from_start = [0, 0]
 
-	# Set its position to the start
-	var posVertical = initStartRow
-	var posHorizontal = initStartCol
-	for block_row in block_matrix:
-		for block_col in block_row:
-			if block_col != 0:
-				moving_block_coords.append([posHorizontal, posVertical])
-				# TODO: Run this at the end, or elsewhere, to draw all the moving block coords
-				draw_moving_block(posHorizontal, posVertical, moving_block_type)
-			posHorizontal += 1  # Draw left to right
-		posHorizontal = initStartCol
-		posVertical -= 1  # Draw top to bottom
+	# Draw block!
+	draw_moving_block()
 
 
-# Takes the current moving block coordinates and freeze them to the game grid
-# Aka sets those coordinates to 2s
+# Takes the current moving block coordinates and freeze them to the game grid (coords to 1s)
 func freeze_moving_block():
 	# Update the game grid with 1s and draw a block at that position
-	for coord in moving_block_coords:
-		game_grid[coord[1]][coord[0]] = 1  # Inverted for the grid!
-		# TODO: This draw block function will change to accept all the coords
-		draw_frozen_block(coord[0], coord[1], moving_block_type)
-		# TODO: Check y levels of block here for line clear
+	for row_i in range(moving_block_matrix.size()):
+		for col_j in range(moving_block_matrix[row_i].size()):
+			if moving_block_matrix[row_i][col_j] != 0:
+				var x = initStartCol - offset_from_start[1]
+				var y = initStartRow - offset_from_start[0]
+				draw_single_frozen_block(x, y)
+				game_grid[x][y] = 1  # Inverted for the grid!
 
-	moving_block_coords = []
+	# TODO: Check for line clearing here, now that game_grid is updated
+	# Since game grid is updated, check for clearable lines
+
+	# Clear children of moving block controller
 	for child in $MovingBlockController.get_children():
 		child.queue_free()
 	$MovingBlockController.reset_position()
@@ -117,39 +114,65 @@ func freeze_moving_block():
 	spawn_block()
 
 
-# Child functino to draw a block, doesn't parent to show in scene
-func draw_block(horizontal, vertical, block_type):
+# Visually draw a block given its current matrix (rotated) combined with offset from start
+func draw_moving_block():
+	for row_i in range(moving_block_matrix.size()):
+		for col_j in range(moving_block_matrix[row_i].size()):
+			print("moving block matrix: ", moving_block_matrix)
+			if moving_block_matrix[row_i][col_j] != 0:
+				var global_x_changes = initStartCol - offset_from_start[1]
+				var global_y_changes = initStartRow - offset_from_start[0]
+				print(
+					"moving block positions: ",
+					row_i + global_x_changes,
+					" - ",
+					col_j + global_y_changes
+				)
+				var block = draw_block(row_i + global_x_changes, col_j + global_y_changes)
+				$MovingBlockController.add_child(block)
+
+
+# Child function to draw a block, doesn't parent to show in scene
+func draw_block(global_x, global_y):
 	var block = load("res://assets/SinglePiece.tscn").instantiate()
-	block.position = Vector3(horizontal, vertical, 1)
+	block.position = Vector3(global_x, global_y, 1)
 	# This feels... reflect-y
 	block.get_children()[0].mesh = load(
-		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(block_type)
+		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(moving_block_type)
 	)
 	return block
 
 
-# Visually draw a block of a certain type at the given coordinates that parents to our moving block controller
-func draw_moving_block(horizontal, vertical, block_type):
-	var block = draw_block(horizontal, vertical, block_type)
-	$MovingBlockController.add_child(block)
-
-
 # Visually draw a block that will never move
-func draw_frozen_block(horizontal, vertical, block_type):
-	var block = draw_block(horizontal, vertical, block_type)
+func draw_single_frozen_block(x, y):
+	var block = draw_block(x + offset_from_start[0], y + offset_from_start[1])
 	$FrozenBlocks.add_child(block)
+
+
+# Returns a list of 2d pairs such that those are global_x and global_y coordinates for a moving block
+# TODO: Use this above where this double for loop shows up?
+func get_moving_block_global_coords():
+	var global_coords = []
+	for row_i in range(moving_block_matrix.size()):
+		for col_j in range(moving_block_matrix[row_i].size()):
+			if moving_block_matrix[row_i][col_j] != 0:
+				var global_x_changes = initStartCol - offset_from_start[1]
+				var global_y_changes = initStartRow - offset_from_start[0]
+				global_coords.append([row_i + global_x_changes, col_j + global_y_changes])
+	return global_coords
 
 
 # Given an x and y coordinate, update the coordinates in moving_block_coords by the given X and Y
 # Weirdness of the row/col stuff is irrelevant to inputs
 func moving_block_transform(changeX, changeY):
 	var can_move: bool = true  # True unless otherwise noted
-	var new_moving_block_coords = moving_block_coords.duplicate(true)
+	var new_moving_block_coords = get_moving_block_global_coords()
 	for coord in new_moving_block_coords:
 		coord[0] = coord[0] + changeX
 		coord[1] = coord[1] + changeY
 		# Check border bounds, doesn't matter what blocks we check
 		if (coord[0] < 0 or coord[0] > 9) or coord[1] < 0:
+			print("hit border?")
 			can_move = false
 			return can_move  # Early return, one illegal move is all we need
 
@@ -158,7 +181,8 @@ func moving_block_transform(changeX, changeY):
 			can_move = false
 			return can_move
 
-	moving_block_coords = new_moving_block_coords.duplicate()
+	# Increment offset - Inverted, and the change vars are already negative
+	offset_from_start = [offset_from_start[0] - changeY, offset_from_start[1] - changeX]
 	return can_move
 
 

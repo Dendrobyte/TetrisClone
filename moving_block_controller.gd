@@ -23,7 +23,8 @@ func _process(_delta):
 
 	# TODO: Make a moving_block_rotate_check or something and use same if logic as above
 	if Input.is_action_just_pressed("rotate_cw"):
-		get_parent().rotate_moving_block(1)
+		#get_parent().rotate_moving_block(1)
+		get_parent().pretty_grid_print()
 	if Input.is_action_just_pressed("rotate_ccw"):
 		get_parent().rotate_moving_block(-1)
 
