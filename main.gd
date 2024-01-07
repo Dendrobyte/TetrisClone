@@ -4,8 +4,8 @@ extends Node
 # This is the primary grid to represent the state of the game
 # grid[0][1] is row 0 column 1 | row 0 is the bottom row, col 0 is the left-most column
 # 0 -> empty
-# 1 -> moving block piece
-# 2 -> frozen block piece
+# 2 -> moving block piece
+# 2+ -> frozen block pieces
 var game_grid = []
 
 
@@ -68,12 +68,20 @@ func init_game_grid():
 	pretty_grid_print()
 
 
-# Iterate over the game grid and draw blocks visually
-# Called when a line is cleared and we can assume a fair portion of the grid changes
-# (For that case, we could technically provid some y-value to redraw but imo the performance doesn't matter)
+# Redraw the entire game grid with frozen blocks
 # NOTE: This is where the diff numbers for each block comes in
-func draw_game_grid():
-	pass
+func redraw_game_grid():
+	# Remove the current children
+	for child in $FrozenBlocks.get_children():
+		child.queue_free()
+
+	# Iterate over grid and draw frozen blocks of the right type
+	for row_i in range(game_grid.size()):
+		for col_j in range(game_grid[row_i].size()):
+			# Subtract 2 because we added 2 since block types start at 0
+			if game_grid[row_i][col_j] != 0:
+				var block_type = game_grid[row_i][col_j] - 2
+				draw_frozen_block(col_j, row_i, block_type)
 
 
 func spawn_block():
@@ -95,14 +103,22 @@ func spawn_block():
 func freeze_moving_block():
 	# Update the game grid with 1s and draw a block at that position
 	for coord in get_moving_block_global_coords():
-		draw_frozen_block(coord[0], coord[1])
+		draw_frozen_block(coord[0], coord[1], moving_block_type)
 		if coord[1] >= 20:
 			print("GAME OVER!")
 			return
-		game_grid[coord[1]][coord[0]] = 1
+		game_grid[coord[1]][coord[0]] = moving_block_type + 2  # Add 2 because 0 and 1 are block types
 
-	# TODO: Check for line clearing here, now that game_grid is updated
 	# Since game grid is updated, check for clearable lines
+	# We could technically provide some y-value(s) to redraw but imo the performance doesn't matter
+	for row in game_grid:
+		if 0 not in row:
+			for i in range(row.size()):
+				# Clear from game grid
+				row[i] = 0
+
+	# Redraw the whole ass grid after all lines are checked
+	redraw_game_grid()
 
 	# Clear children of moving block controller
 	for child in $MovingBlockController.get_children():
@@ -112,6 +128,18 @@ func freeze_moving_block():
 	spawn_block()
 
 
+# Child function to draw a block, doesn't parent to show in scene
+func draw_block(global_x, global_y, block_type):
+	var block = load("res://assets/SinglePiece.tscn").instantiate()
+	block.position = Vector3(global_x, global_y, 1)
+
+	# This feels... reflect-y
+	block.get_children()[0].mesh = load(
+		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(block_type)
+	)
+	return block
+
+
 # Visually draw a block given its current matrix (rotated) combined with offset from start
 func draw_moving_block():
 	# Clear children since we always redraw
@@ -119,28 +147,14 @@ func draw_moving_block():
 		child.free()
 
 	for coord in get_moving_block_global_coords():
-		print("Drawing at coord: ", coord)
-		var block = draw_block(coord[0], coord[1])
+		var block = draw_block(coord[0], coord[1], moving_block_type)
 		$MovingBlockController.add_child(block)
 
 
-# Child function to draw a block, doesn't parent to show in scene
-func draw_block(global_x, global_y):
-	print("Drawing single block at: ", global_x, ", ", global_y)
-	var block = load("res://assets/SinglePiece.tscn").instantiate()
-	block.position = Vector3(global_x, global_y, 1)
-	print("pos: ", block.position)
-
-	# This feels... reflect-y
-	block.get_children()[0].mesh = load(
-		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(moving_block_type)
-	)
-	return block
-
-
 # Visually draw a block that will never move
-func draw_frozen_block(x, y):
-	var block = draw_block(x, y)
+# Frozen type varies for a landing block or drawing from game grid redraw
+func draw_frozen_block(x, y, frozen_block_type):
+	var block = draw_block(x, y, frozen_block_type)
 	$FrozenBlocks.add_child(block)
 
 
@@ -169,8 +183,8 @@ func moving_block_transform(changeX, changeY):
 			can_move = false
 			return can_move  # Early return, one illegal move is all we need
 
-		# Check if there are placed blocks around it, can ignore moving block pieces (2s)
-		if game_grid[yCoord][xCoord] == 1:
+		# Check if there are placed blocks around it, can ignore moving block pieces (1s)
+		if game_grid[yCoord][xCoord] >= 2:
 			can_move = false
 			return can_move
 
