@@ -76,7 +76,11 @@ func redraw_game_grid():
 		child.queue_free()
 
 	# Iterate over grid and draw frozen blocks of the right type
+	var empty_rows = 0
 	for row_i in range(game_grid.size()):
+		# TODO: If it's all zeroes, incr empty_rows
+		#		Then row_i += 1 and continue
+		#		Finally, add empty_rows of 0 arrays onto the game grid
 		for col_j in range(game_grid[row_i].size()):
 			# Subtract 2 because we added 2 since block types start at 0
 			if game_grid[row_i][col_j] != 0:
