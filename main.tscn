@@ -11,8 +11,6 @@ ambient_light_color = Color(0.768627, 0.792157, 0.827451, 1)
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
-initStartRow = null
-initStartCol = null
 falling_speed = 10
 
 [node name="MovingBlockController" type="Node3D" parent="."]
