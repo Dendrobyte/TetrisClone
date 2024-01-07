@@ -53,14 +53,12 @@ func _process(_delta):
 			freeze_moving_block()
 		frame_counter = 0
 	else:
-		# while testing rotation I don't want to have to worry about this
-		# frame_counter += 1
-		pass
+		frame_counter += 1
 
 
 func init_game_grid():
 	var grid_rows = []
-	for i in range(20):
+	for i in range(24):  # Height doesn't really matter
 		var row_arr = []
 		for j in range(10):
 			row_arr.append(0)
@@ -71,7 +69,7 @@ func init_game_grid():
 
 # Iterate over the game grid and draw blocks visually
 # Called when a line is cleared and we can assume a fair portion of the grid changes
-# (For thht case, we could technically provid some y-value to redraw but imo the performance doesn't matter)
+# (For that case, we could technically provid some y-value to redraw but imo the performance doesn't matter)
 # NOTE: This is where the diff numbers for each block comes in
 func draw_game_grid():
 	pass
@@ -95,13 +93,12 @@ func spawn_block():
 # Takes the current moving block coordinates and freeze them to the game grid (coords to 1s)
 func freeze_moving_block():
 	# Update the game grid with 1s and draw a block at that position
-	for row_i in range(moving_block_matrix.size()):
-		for col_j in range(moving_block_matrix[row_i].size()):
-			if moving_block_matrix[row_i][col_j] != 0:
-				var x = initStartCol - offset_from_start[1]
-				var y = initStartRow - offset_from_start[0]
-				draw_single_frozen_block(x, y)
-				game_grid[x][y] = 1  # Inverted for the grid!
+	for coord in get_moving_block_global_coords():
+		draw_frozen_block(coord[0], coord[1])
+		if coord[1] >= 20:
+			print("GAME OVER!")
+			return
+		game_grid[coord[1]][coord[0]] = 1
 
 	# TODO: Check for line clearing here, now that game_grid is updated
 	# Since game grid is updated, check for clearable lines
@@ -116,20 +113,9 @@ func freeze_moving_block():
 
 # Visually draw a block given its current matrix (rotated) combined with offset from start
 func draw_moving_block():
-	for row_i in range(moving_block_matrix.size()):
-		for col_j in range(moving_block_matrix[row_i].size()):
-			print("moving block matrix: ", moving_block_matrix)
-			if moving_block_matrix[row_i][col_j] != 0:
-				var global_x_changes = initStartCol - offset_from_start[1]
-				var global_y_changes = initStartRow - offset_from_start[0]
-				print(
-					"moving block positions: ",
-					row_i + global_x_changes,
-					" - ",
-					col_j + global_y_changes
-				)
-				var block = draw_block(row_i + global_x_changes, col_j + global_y_changes)
-				$MovingBlockController.add_child(block)
+	for coord in get_moving_block_global_coords():
+		var block = draw_block(coord[0], coord[1])
+		$MovingBlockController.add_child(block)
 
 
 # Child function to draw a block, doesn't parent to show in scene
@@ -144,8 +130,8 @@ func draw_block(global_x, global_y):
 
 
 # Visually draw a block that will never move
-func draw_single_frozen_block(x, y):
-	var block = draw_block(x + offset_from_start[0], y + offset_from_start[1])
+func draw_frozen_block(x, y):
+	var block = draw_block(x, y)
 	$FrozenBlocks.add_child(block)
 
 
@@ -167,12 +153,12 @@ func get_moving_block_global_coords():
 func moving_block_transform(changeX, changeY):
 	var can_move: bool = true  # True unless otherwise noted
 	var new_moving_block_coords = get_moving_block_global_coords()
+	print("MC: ", new_moving_block_coords)
 	for coord in new_moving_block_coords:
 		coord[0] = coord[0] + changeX
 		coord[1] = coord[1] + changeY
 		# Check border bounds, doesn't matter what blocks we check
 		if (coord[0] < 0 or coord[0] > 9) or coord[1] < 0:
-			print("hit border?")
 			can_move = false
 			return can_move  # Early return, one illegal move is all we need
 
