@@ -20,6 +20,7 @@ func pretty_grid_print():
 @onready var moving_block: Node3D = $MovingBlockController
 
 # Save offset from start each movement for drawing, freezing. Makes rotation possible (I hope?)
+# index 0 is vertical offset, index 1 is horizontal offset
 var offset_from_start = [0, 0]
 # Keep track of which block we are moving so we can draw the proper color
 var moving_block_type = -1
@@ -48,7 +49,7 @@ func _process(_delta):
 	if frame_counter == falling_speed:
 		var moved = moving_block_transform(0, -1)
 		if moved:
-			moving_block.translate(Vector3(0, -1, 0))
+			draw_moving_block()
 		else:
 			freeze_moving_block()
 		frame_counter = 0
@@ -113,15 +114,23 @@ func freeze_moving_block():
 
 # Visually draw a block given its current matrix (rotated) combined with offset from start
 func draw_moving_block():
+	# Clear children since we always redraw
+	for child in $MovingBlockController.get_children():
+		child.free()
+
 	for coord in get_moving_block_global_coords():
+		print("Drawing at coord: ", coord)
 		var block = draw_block(coord[0], coord[1])
 		$MovingBlockController.add_child(block)
 
 
 # Child function to draw a block, doesn't parent to show in scene
 func draw_block(global_x, global_y):
+	print("Drawing single block at: ", global_x, ", ", global_y)
 	var block = load("res://assets/SinglePiece.tscn").instantiate()
 	block.position = Vector3(global_x, global_y, 1)
+	print("pos: ", block.position)
+
 	# This feels... reflect-y
 	block.get_children()[0].mesh = load(
 		"res://assets/BlockPieces/SinglePiece-%s.obj" % str(moving_block_type)
@@ -136,7 +145,6 @@ func draw_frozen_block(x, y):
 
 
 # Returns a list of 2d pairs such that those are global_x and global_y coordinates for a moving block
-# TODO: Use this above where this double for loop shows up?
 func get_moving_block_global_coords():
 	var global_coords = []
 	for row_i in range(moving_block_matrix.size()):
@@ -153,54 +161,61 @@ func get_moving_block_global_coords():
 func moving_block_transform(changeX, changeY):
 	var can_move: bool = true  # True unless otherwise noted
 	var new_moving_block_coords = get_moving_block_global_coords()
-	print("MC: ", new_moving_block_coords)
 	for coord in new_moving_block_coords:
-		coord[0] = coord[0] + changeX
-		coord[1] = coord[1] + changeY
+		var xCoord = coord[0] + changeX
+		var yCoord = coord[1] + changeY
 		# Check border bounds, doesn't matter what blocks we check
-		if (coord[0] < 0 or coord[0] > 9) or coord[1] < 0:
+		if (xCoord < 0 or xCoord > 9) or yCoord < 0:
 			can_move = false
 			return can_move  # Early return, one illegal move is all we need
 
 		# Check if there are placed blocks around it, can ignore moving block pieces (2s)
-		if game_grid[coord[1]][coord[0]] == 1:
+		if game_grid[yCoord][xCoord] == 1:
 			can_move = false
 			return can_move
 
 	# Increment offset - Inverted, and the change vars are already negative
 	offset_from_start = [offset_from_start[0] - changeY, offset_from_start[1] - changeX]
+
+	# It is up to the function that sees this to check can_move and redraw accordingly
 	return can_move
 
 
+func rotate_moving_block(change):
+	var rotations = 0
+	if change == 1:
+		rotations = 1
+	if change == -1:
+		rotations = 3
+
+	for i in range(rotations):
+		rotate_moving_block_once()
+
+	# Clear all previous children and redraw
+	for child in $MovingBlockController.get_children():
+		child.queue_free()
+	draw_moving_block()
+
+
 # TODO: Make return if possible like the above moving transform function
-func rotate_moving_block(rotation_change):
-	moving_block_rotation = (moving_block_rotation + rotation_change) % 4
-	var block_matrix = BlockCoords.block_map[moving_block_type]  # Starts at 0
+# Rotates the moving block matrix and triggers a redraw
+func rotate_moving_block_once():
+	# Rotate the matrix
+	var x = moving_block_matrix.size()
+	var y = moving_block_matrix[0].size()
+	var new_rotation = []
+	# Transpose
+	for m in range(y):
+		var new_row = []
+		new_row.resize(x)
+		new_rotation.append(new_row)
 
-	# Perform rotation(s) on original matrix
-	for i in range(abs(moving_block_rotation)):
-		var x = block_matrix.size()
-		var y = block_matrix[0].size()
-		var new_rotation = []
+	# Reverse each row
+	for m in range(x):
+		for n in range(y):
+			new_rotation[n][m] = moving_block_matrix[x - m - 1][n]
 
-		# Transpose
-		for m in range(y):
-			var new_row = []
-			new_row.resize(x)
-			new_rotation.append(new_row)
+	# TODO: See if valid, return early if not
 
-		# Reverse each row
-		for m in range(x):
-			for n in range(y):
-				new_rotation[n][m] = block_matrix[x - m - 1][n]
-
-		#print("new rotation:", new_rotation)
-
-	# TODO
-	# Calculate offset from starting position in moving coords
-	# NOTE: You should get the current rotation or something...
-	#		Maybe hold on to xOffset and yOffset each move for now tbh
-
-	# Reset moving coords
-
-	# Redraw block
+	# Set the new matrix and redraw the block
+	moving_block_matrix = new_rotation

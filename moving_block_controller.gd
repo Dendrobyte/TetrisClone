@@ -12,19 +12,18 @@ func _process(_delta):
 	"""
 	if Input.is_action_just_pressed("move_left"):
 		if get_parent().moving_block_transform(-1, 0):
-			translate(Vector3(-1, 0, 0))
+			get_parent().draw_moving_block()
 	if Input.is_action_just_pressed("move_right"):
 		if get_parent().moving_block_transform(1, 0):
-			translate(Vector3(1, 0, 0))
+			get_parent().draw_moving_block()
 	if Input.is_action_just_pressed("move_down"):
 		if get_parent().moving_block_transform(0, -1):
-			translate(Vector3(0, -1, 0))
+			get_parent().draw_moving_block()
 			get_parent().frame_counter = 0  # Reset the frame counter to avoid weird skipping movement
 
-	# TODO: Make a moving_block_rotate_check or something and use same if logic as above
+	# Redraw happens on rotate so we're ignoring rotating actual block since it's finicky
 	if Input.is_action_just_pressed("rotate_cw"):
-		#get_parent().rotate_moving_block(1)
-		get_parent().pretty_grid_print()
+		get_parent().rotate_moving_block(1)
 	if Input.is_action_just_pressed("rotate_ccw"):
 		get_parent().rotate_moving_block(-1)
 
