@@ -69,23 +69,36 @@ func init_game_grid():
 
 
 # Redraw the entire game grid with frozen blocks
-# NOTE: This is where the diff numbers for each block comes in
 func redraw_game_grid():
 	# Remove the current children
 	for child in $FrozenBlocks.get_children():
 		child.queue_free()
 
-	# Iterate over grid and draw frozen blocks of the right type
-	var empty_rows = 0
+	# Iterate over grid and create new grid
+	var new_grid = []
+	var empty_rows = 0  # could take diff of len(game_grid) - len(new_grid)
+	for row in game_grid:
+		if 9 not in row:  # 9 marks row to clear
+			new_grid.append(row)
+			empty_rows += 1
+	game_grid = new_grid.duplicate()
+
+	# Then redraw frozen blocks corresponding to proper number
 	for row_i in range(game_grid.size()):
-		# TODO: If it's all zeroes, incr empty_rows
-		#		Then row_i += 1 and continue
-		#		Finally, add empty_rows of 0 arrays onto the game grid
 		for col_j in range(game_grid[row_i].size()):
 			# Subtract 2 because we added 2 since block types start at 0
 			if game_grid[row_i][col_j] != 0:
 				var block_type = game_grid[row_i][col_j] - 2
 				draw_frozen_block(col_j, row_i, block_type)
+
+	# Add new rows onto the grid to account for deleted rows
+	for i in range(empty_rows):
+		var row_arr = []
+		for j in range(10):
+			row_arr.append(0)
+		game_grid.append(row_arr)
+
+	pretty_grid_print()
 
 
 func spawn_block():
@@ -110,19 +123,23 @@ func freeze_moving_block():
 		draw_frozen_block(coord[0], coord[1], moving_block_type)
 		if coord[1] >= 20:
 			print("GAME OVER!")
+			init_game_grid()  # TODO: Start over for now
 			return
 		game_grid[coord[1]][coord[0]] = moving_block_type + 2  # Add 2 because 0 and 1 are block types
 
 	# Since game grid is updated, check for clearable lines
 	# We could technically provide some y-value(s) to redraw but imo the performance doesn't matter
+	var clear_line_found = false
 	for row in game_grid:
 		if 0 not in row:
+			clear_line_found = true
 			for i in range(row.size()):
 				# Clear from game grid
-				row[i] = 0
+				row[i] = 9  # 9 marks for deletion
 
 	# Redraw the whole ass grid after all lines are checked
-	redraw_game_grid()
+	if clear_line_found:
+		redraw_game_grid()
 
 	# Clear children of moving block controller
 	for child in $MovingBlockController.get_children():
