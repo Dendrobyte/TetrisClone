@@ -1,18 +1,22 @@
-[gd_scene load_steps=5 format=3 uid="uid://10tuwo4gmihv"]
+[gd_scene load_steps=8 format=3 uid="uid://10tuwo4gmihv"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_3lkeu"]
 [ext_resource type="ArrayMesh" uid="uid://bq0y5b7jsn382" path="res://assets/Border.obj" id="2_7xgnq"]
 [ext_resource type="Script" path="res://moving_block_controller.gd" id="2_mqbh0"]
+[ext_resource type="Script" path="res://score.gd" id="4_ssv3s"]
 
 [sub_resource type="Environment" id="Environment_1uo0t"]
 background_mode = 1
 background_color = Color(0.14902, 0.14902, 0.14902, 1)
 ambient_light_color = Color(0.768627, 0.792157, 0.827451, 1)
 
+[sub_resource type="Theme" id="Theme_i53kx"]
+
+[sub_resource type="Theme" id="Theme_6cb81"]
+default_font_size = 48
+
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
-initStartRow = null
-initStartCol = null
 falling_speed = 10
 
 [node name="MovingBlockController" type="Node3D" parent="."]
@@ -34,3 +38,20 @@ environment = SubResource("Environment_1uo0t")
 [node name="PrimaryLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.22052, 17.7823, 1.76043)
 light_energy = 16.0
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = SubResource("Theme_i53kx")
+
+[node name="Score" type="Label" parent="UI"]
+layout_mode = 0
+offset_right = 130.0
+offset_bottom = 55.0
+theme = SubResource("Theme_6cb81")
+text = "Score: 0"
+script = ExtResource("4_ssv3s")
+
+[connection signal="line_cleared" from="." to="UI/Score" method="_on_main_line_cleared"]

@@ -1,5 +1,7 @@
 extends Node
 
+signal line_cleared
+
 # Game Grid
 # This is the primary grid to represent the state of the game
 # grid[0][1] is row 0 column 1 | row 0 is the bottom row, col 0 is the left-most column
@@ -130,9 +132,11 @@ func freeze_moving_block():
 	# Since game grid is updated, check for clearable lines
 	# We could technically provide some y-value(s) to redraw but imo the performance doesn't matter
 	var clear_line_found = false
+	var lines_cleared = 0
 	for row in game_grid:
 		if 0 not in row:
 			clear_line_found = true
+			lines_cleared += 1
 			for i in range(row.size()):
 				# Clear from game grid
 				row[i] = 9  # 9 marks for deletion
@@ -140,6 +144,7 @@ func freeze_moving_block():
 	# Redraw the whole ass grid after all lines are checked
 	if clear_line_found:
 		redraw_game_grid()
+		line_cleared.emit(lines_cleared)
 
 	# Clear children of moving block controller
 	for child in $MovingBlockController.get_children():
