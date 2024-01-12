@@ -17,7 +17,6 @@ default_font_size = 48
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
-falling_speed = 10
 
 [node name="MovingBlockController" type="Node3D" parent="."]
 script = ExtResource("2_mqbh0")

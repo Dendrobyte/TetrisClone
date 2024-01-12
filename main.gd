@@ -35,8 +35,9 @@ var moving_block_matrix = []
 # Weirdly inverted? Row not being X throws me off, but effectively rows are sitting on the Y. We draw top down.
 @export var initStartRow: int = 18  # Y | 0 is the bottom row
 @export var initStartCol: int = 4  # X | which column /in the above row/ to start at
-@export_range(1, 60) var falling_speed: int = 60
+@export_range(1, 20) var falling_speed: int = 1  # 1 slowest, 12 fastest
 var frame_counter: int = 0
+var freeze_delay: int = 5
 
 
 # Called when the node enters the scene tree for the first time.
@@ -47,16 +48,46 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	# Attempt to move down
-	if frame_counter == falling_speed:
-		var moved = moving_block_transform(0, -1)
-		if moved:
+	var has_moved = false
+	# Move down at a given speed
+	# X is max, so subtract falling speed to make that variable readable = Y
+	# multiplier is effectively saying every (Y * 3) frames the block moves
+	if frame_counter == (20 - falling_speed) * 3:
+		has_moved = moving_block_transform(0, -1)
+		if has_moved:
+			freeze_delay = 0
 			draw_moving_block()
 		else:
-			freeze_moving_block()
+			freeze_delay += 1
+			# Never go less than 5 frames or more than 60 to freeze
+			if freeze_delay == max(min(60, 20 - falling_speed) * 5, 5):
+				freeze_moving_block()
+				freeze_delay = 0
 		frame_counter = 0
 	else:
 		frame_counter += 1
+
+	# Delay freezing of a block if moving around
+	if has_moved:
+		freeze_delay = 0
+	freeze_delay += 1
+
+	# Never go less than 5 frames or more than 60 to freeze
+	if freeze_delay == max(min(60, 20 - falling_speed) * 5, 5):
+		freeze_moving_block()
+		freeze_delay = 0
+
+	# DEBUG STUFF #
+	if Input.is_action_just_pressed("debug_key"):
+		falling_speed += 1
+		frame_counter = 0
+		print("Falling speed from ", falling_speed - 1, " to ", falling_speed)
+
+
+# If the project was better organized, this would make more sense
+func block_moved():
+	draw_moving_block()
+	freeze_delay = 0
 
 
 func init_game_grid():
