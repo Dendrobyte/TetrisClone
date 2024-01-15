@@ -42,6 +42,8 @@ var freeze_delay: int = 5
 # Menu stuff
 @onready var menu_node = load("res://menu_control.tscn").instantiate()
 var pause = false
+var soundtrack_pos
+var music_enabled = true
 
 
 # Called when the node enters the scene tree for the first time.
@@ -50,12 +52,20 @@ func _ready():
 	add_child(menu_node)
 	# Make the pause text invisible
 	get_node("UI/PAUSED").visible = false
+	# TODO: see if music is enabled
+	get_tree().call_group("menu", "is_music_enabled", music_enabled)
+	print(music_enabled)
 
 
 # Called to start the game
 func start_game():
 	init_game_grid()
 	spawn_block()
+
+	var soundtrack_node = $UI/Korobeiniki
+	soundtrack_node.volume_db = -20.0
+	if music_enabled:
+		soundtrack_node.play()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -77,7 +87,6 @@ func _process(_delta):
 			# Never go less than 5 frames or more than 60 to freeze
 			if freeze_delay == max(min(60, 20 - falling_speed) * 5, 5):
 				freeze_moving_block()
-				freeze_delay = 0
 		frame_counter = 0
 	else:
 		frame_counter += 1
@@ -102,6 +111,7 @@ func block_moved():
 func pause_game():
 	pause = !pause
 	get_node("UI/PAUSED").visible = !get_node("UI/PAUSED").visible
+	var soundtrack_node = $UI/Korobeiniki
 
 	# Draw empty or non-empty game grid accordingly
 	if pause:
@@ -109,9 +119,16 @@ func pause_game():
 			child.queue_free()
 		for child in $MovingBlockController.get_children():
 			child.queue_free()
+
+		# Save the playback position to restart from later
+		#if music_enabled:  # I feel like this isn't necessary because you can always stop
+		soundtrack_pos = soundtrack_node.get_playback_position()
+		soundtrack_node.stop()
 	else:
 		redraw_game_grid()
 		draw_moving_block()
+		if music_enabled:
+			soundtrack_node.play(soundtrack_pos)
 
 
 func init_game_grid():
@@ -179,7 +196,10 @@ func freeze_moving_block():
 	for coord in get_moving_block_global_coords():
 		draw_frozen_block(coord[0], coord[1], moving_block_type)
 		if coord[1] >= 20:
+			# TODO: Move to game over functino
 			print("GAME OVER!")
+			if music_enabled:  # I feel like this isn't necessary because you can always stop
+				$UI/Korobeiniki.stop()
 			init_game_grid()  # TODO: Start over for now
 			return
 		game_grid[coord[1]][coord[0]] = moving_block_type + 2  # Add 2 because 0 and 1 are block types
@@ -206,6 +226,11 @@ func freeze_moving_block():
 		child.queue_free()
 	$MovingBlockController.reset_position()
 
+	# I doubt I need one per sound effect in general, but this suffices for now
+	# Likely reloading sound resource or something for each stream?
+	$BlockFreezeSound.play()
+
+	freeze_delay = 0  # Reset here because instant down also freezes. Variable itself should be better organized.
 	spawn_block()
 
 
