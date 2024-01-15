@@ -25,6 +25,8 @@ func _process(_delta):
 		while get_parent().moving_block_transform(0, -1):
 			get_parent().draw_moving_block()
 			get_parent().frame_counter = 0  # Unique to down movement
+	if Input.is_action_just_pressed("pause"):
+		get_parent().pause_game()
 
 	# Redraw happens on rotate so we're ignoring rotating actual block since it's finicky
 	if Input.is_action_just_pressed("rotate_cw"):

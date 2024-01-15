@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://10tuwo4gmihv"]
+[gd_scene load_steps=9 format=3 uid="uid://10tuwo4gmihv"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_3lkeu"]
 [ext_resource type="ArrayMesh" uid="uid://bq0y5b7jsn382" path="res://assets/Border.obj" id="2_7xgnq"]
@@ -14,6 +14,9 @@ ambient_light_color = Color(0.768627, 0.792157, 0.827451, 1)
 
 [sub_resource type="Theme" id="Theme_6cb81"]
 default_font_size = 48
+
+[sub_resource type="Theme" id="Theme_8l4gb"]
+default_font_size = 0
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
@@ -52,5 +55,16 @@ offset_bottom = 55.0
 theme = SubResource("Theme_6cb81")
 text = "Score: 0"
 script = ExtResource("4_ssv3s")
+
+[node name="PAUSED" type="RichTextLabel" parent="UI"]
+layout_mode = 0
+offset_right = 2300.0
+offset_bottom = 1299.0
+theme = SubResource("Theme_8l4gb")
+theme_override_font_sizes/normal_font_size = 400
+theme_override_font_sizes/mono_font_size = 0
+text = "GAME PAUSED"
+fit_content = true
+autowrap_mode = 2
 
 [connection signal="line_cleared" from="." to="UI/Score" method="_on_main_line_cleared"]

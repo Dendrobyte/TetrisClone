@@ -35,24 +35,39 @@ var moving_block_matrix = []
 # Weirdly inverted? Row not being X throws me off, but effectively rows are sitting on the Y. We draw top down.
 @export var initStartRow: int = 18  # Y | 0 is the bottom row
 @export var initStartCol: int = 4  # X | which column /in the above row/ to start at
-@export_range(1, 20) var falling_speed: int = 1  # 1 slowest, 12 fastest
+@export_range(1, 20) var falling_speed: int = 1  # 1 slowest, 20s fastest
 var frame_counter: int = 0
 var freeze_delay: int = 5
+
+# Menu stuff
+@onready var menu_node = load("res://menu_control.tscn").instantiate()
+var pause = false
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Start with menu overlay on border background
+	add_child(menu_node)
+	# Make the pause text invisible
+	get_node("UI/PAUSED").visible = false
+
+
+# Called to start the game
+func start_game():
 	init_game_grid()
 	spawn_block()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	# If we are paused, process nothing
+	if pause:
+		return
 	var has_moved = false
 	# Move down at a given speed
 	# X is max, so subtract falling speed to make that variable readable = Y
 	# multiplier is effectively saying every (Y * 3) frames the block moves
-	if frame_counter == (20 - falling_speed) * 3:
+	if frame_counter >= (20 - falling_speed) * 3:
 		has_moved = moving_block_transform(0, -1)
 		if has_moved:
 			freeze_delay = 0
@@ -77,17 +92,26 @@ func _process(_delta):
 		freeze_moving_block()
 		freeze_delay = 0
 
-	# DEBUG STUFF #
-	if Input.is_action_just_pressed("debug_key"):
-		falling_speed += 1
-		frame_counter = 0
-		print("Falling speed from ", falling_speed - 1, " to ", falling_speed)
-
 
 # If the project was better organized, this would make more sense
 func block_moved():
 	draw_moving_block()
 	freeze_delay = 0
+
+
+func pause_game():
+	pause = !pause
+	get_node("UI/PAUSED").visible = !get_node("UI/PAUSED").visible
+
+	# Draw empty or non-empty game grid accordingly
+	if pause:
+		for child in $FrozenBlocks.get_children():
+			child.queue_free()
+		for child in $MovingBlockController.get_children():
+			child.queue_free()
+	else:
+		redraw_game_grid()
+		draw_moving_block()
 
 
 func init_game_grid():
