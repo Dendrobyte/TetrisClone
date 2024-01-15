@@ -1,9 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://10tuwo4gmihv"]
+[gd_scene load_steps=11 format=3 uid="uid://10tuwo4gmihv"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_3lkeu"]
 [ext_resource type="ArrayMesh" uid="uid://bq0y5b7jsn382" path="res://assets/Border.obj" id="2_7xgnq"]
 [ext_resource type="Script" path="res://moving_block_controller.gd" id="2_mqbh0"]
+[ext_resource type="AudioStream" uid="uid://c6witarma0f1p" path="res://assets/BlockFreeze.mp3" id="3_u5g7n"]
 [ext_resource type="Script" path="res://score.gd" id="4_ssv3s"]
+[ext_resource type="AudioStream" uid="uid://dxqbl4q2safn3" path="res://assets/Soundtrack.mp3" id="5_ub3u1"]
 
 [sub_resource type="Environment" id="Environment_1uo0t"]
 background_mode = 1
@@ -66,5 +68,12 @@ theme_override_font_sizes/mono_font_size = 0
 text = "GAME PAUSED"
 fit_content = true
 autowrap_mode = 2
+
+[node name="Korobeiniki" type="AudioStreamPlayer" parent="UI"]
+stream = ExtResource("5_ub3u1")
+
+[node name="BlockFreezeSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_u5g7n")
+volume_db = -24.0
 
 [connection signal="line_cleared" from="." to="UI/Score" method="_on_main_line_cleared"]

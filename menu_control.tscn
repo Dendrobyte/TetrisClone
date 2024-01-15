@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://menu_control.gd" id="1_j3vng"]
 [ext_resource type="Texture2D" uid="uid://bnpdhu2rgf71x" path="res://tetris bg.png" id="2_pbi5p"]
 
-[node name="Menu Control" type="Control"]
+[node name="Menu Control" type="Control" groups=["menu"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,6 +41,12 @@ fit_content = true
 layout_mode = 2
 alignment = 1
 
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Music - sike this doesn't work :)"
+
 [connection signal="pressed" from="VBoxContainer/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="item_selected" from="VBoxContainer/OptionButton" to="." method="_on_option_button_item_selected"]
+[connection signal="toggled" from="VBoxContainer/CheckBox" to="." method="_on_check_box_toggled"]
