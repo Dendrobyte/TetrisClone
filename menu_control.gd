@@ -20,7 +20,7 @@ func _on_exit_button_pressed():
 
 
 func _on_option_button_item_selected(index):
-	get_parent().falling_speed = index  # Index matches value so w/e
+	get_parent().falling_speed = index + 1  # Index+1 matches value so w/e
 
 # func _on_check_box_toggled(toggled_on: bool):
 # 	music_toggle = toggled_on

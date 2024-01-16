@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://10tuwo4gmihv"]
+[gd_scene load_steps=13 format=3 uid="uid://10tuwo4gmihv"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_3lkeu"]
 [ext_resource type="ArrayMesh" uid="uid://bq0y5b7jsn382" path="res://assets/Border.obj" id="2_7xgnq"]
 [ext_resource type="Script" path="res://moving_block_controller.gd" id="2_mqbh0"]
 [ext_resource type="AudioStream" uid="uid://c6witarma0f1p" path="res://assets/BlockFreeze.mp3" id="3_u5g7n"]
 [ext_resource type="Script" path="res://score.gd" id="4_ssv3s"]
+[ext_resource type="Script" path="res://speed_label.gd" id="5_hal4n"]
 [ext_resource type="AudioStream" uid="uid://dxqbl4q2safn3" path="res://assets/Soundtrack.mp3" id="5_ub3u1"]
 
 [sub_resource type="Environment" id="Environment_1uo0t"]
@@ -19,6 +20,8 @@ default_font_size = 48
 
 [sub_resource type="Theme" id="Theme_8l4gb"]
 default_font_size = 0
+
+[sub_resource type="Theme" id="Theme_8oxi0"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3lkeu")
@@ -58,6 +61,15 @@ theme = SubResource("Theme_6cb81")
 text = "Score: 0"
 script = ExtResource("4_ssv3s")
 
+[node name="Speed" type="Label" parent="UI"]
+layout_mode = 0
+offset_top = 70.0
+offset_right = 180.0
+offset_bottom = 150.0
+theme = SubResource("Theme_6cb81")
+text = "Speed: 0"
+script = ExtResource("5_hal4n")
+
 [node name="PAUSED" type="RichTextLabel" parent="UI"]
 layout_mode = 0
 offset_right = 2300.0
@@ -72,8 +84,28 @@ autowrap_mode = 2
 [node name="Korobeiniki" type="AudioStreamPlayer" parent="UI"]
 stream = ExtResource("5_ub3u1")
 
+[node name="GameOver" type="Label" parent="UI"]
+layout_mode = 0
+offset_left = 778.0
+offset_right = 1692.0
+offset_bottom = 595.0
+theme = SubResource("Theme_8oxi0")
+theme_override_font_sizes/font_size = 146
+text = "GAME OVER
+SCORE:"
+
+[node name="RetryButton" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 1003.0
+offset_top = 453.0
+offset_right = 1296.0
+offset_bottom = 566.0
+text = "Retry"
+
 [node name="BlockFreezeSound" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_u5g7n")
 volume_db = -24.0
 
 [connection signal="line_cleared" from="." to="UI/Score" method="_on_main_line_cleared"]
+[connection signal="line_cleared" from="." to="UI/Speed" method="_on_main_line_cleared"]
+[connection signal="pressed" from="UI/RetryButton" to="." method="_on_retry_button_pressed"]

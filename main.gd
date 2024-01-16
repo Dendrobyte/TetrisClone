@@ -42,6 +42,7 @@ var freeze_delay: int = 5
 # Menu stuff
 @onready var menu_node = load("res://menu_control.tscn").instantiate()
 var pause = false
+var is_playing = false
 var soundtrack_pos
 var music_enabled = true
 
@@ -54,7 +55,6 @@ func _ready():
 	get_node("UI/PAUSED").visible = false
 	# TODO: see if music is enabled
 	get_tree().call_group("menu", "is_music_enabled", music_enabled)
-	print(music_enabled)
 
 
 # Called to start the game
@@ -67,11 +67,33 @@ func start_game():
 	if music_enabled:
 		soundtrack_node.play()
 
+	# Final sprint, don't care!
+	$UI/GameOver.text = ""
+	$UI/RetryButton.visible = false
+	$UI/Score.reset()
+	$UI/Speed.reset()
+
+	is_playing = true
+
+
+func end_game():
+	for child in $FrozenBlocks.get_children():
+		child.queue_free()
+	for child in $MovingBlockController.get_children():
+		child.queue_free()
+
+	$UI/Korobeiniki.stop()
+
+	$UI/GameOver.text = "GAME OVER\nSCORE: " + str($UI/Score.score)
+	$UI/RetryButton.visible = true
+
+	is_playing = false
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	# If we are paused, process nothing
-	if pause:
+	if pause || !is_playing:
 		return
 	var has_moved = false
 	# Move down at a given speed
@@ -197,7 +219,7 @@ func freeze_moving_block():
 		draw_frozen_block(coord[0], coord[1], moving_block_type)
 		if coord[1] >= 20:
 			# TODO: Move to game over functino
-			print("GAME OVER!")
+			end_game()
 			if music_enabled:  # I feel like this isn't necessary because you can always stop
 				$UI/Korobeiniki.stop()
 			init_game_grid()  # TODO: Start over for now
@@ -224,7 +246,6 @@ func freeze_moving_block():
 	# Clear children of moving block controller
 	for child in $MovingBlockController.get_children():
 		child.queue_free()
-	$MovingBlockController.reset_position()
 
 	# I doubt I need one per sound effect in general, but this suffices for now
 	# Likely reloading sound resource or something for each stream?
@@ -339,3 +360,7 @@ func rotate_moving_block_once():
 
 	# Set the new matrix and redraw the block
 	moving_block_matrix = new_rotation
+
+
+func _on_retry_button_pressed():
+	start_game()
